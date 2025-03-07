@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert -f ../ndrc_demo/docker-compose.yml
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: cloud-db
+  name: cloud-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: cloud-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert -f ../ndrc_demo/docker-compose.yml
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: cloud-db
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: cloud_db
+            - name: POSTGRES_PASSWORD
+              value: cloud_pass
+            - name: POSTGRES_USER
+              value: cloud_user
+          image: postgres:13
+          name: cloud-db
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: cloud-db-data
+      restartPolicy: Always
+      volumes:
+        - name: cloud-db-data
+          persistentVolumeClaim:
+            claimName: cloud-db-data
